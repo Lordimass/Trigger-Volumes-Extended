@@ -6,13 +6,13 @@ import com.hypixel.hytale.builtin.triggervolumes.effect.TriggerEventType;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
-import com.hypixel.hytale.codec.codecs.EnumCodec;
 
 import javax.annotation.Nonnull;
 
 public class PressInteractionEffect extends TriggerEffect {
 
     private static final String DEFAULT_HINT = "server.interactionHints.generic";
+    private static final String DEFAULT_EVENT = "PRESS";
 
     @Nonnull
     public static final BuilderCodec<PressInteractionEffect> CODEC = BuilderCodec.builder(
@@ -22,11 +22,6 @@ public class PressInteractionEffect extends TriggerEffect {
                     new KeyedCodec<>("Hint", Codec.STRING, false),
                     (e, v) -> e.hint = v,
                     (e) -> e.hint
-            ).add()
-            .append(
-                    new KeyedCodec<>("InteractionEvent", new EnumCodec<>(TriggerEventType.class), false),
-                    (e, v) -> e.interactionEvent = v,
-                    (e) -> e.interactionEvent
             ).add()
             .append(
                     new KeyedCodec<>("IncludeGroupEffects", Codec.BOOLEAN, false),
@@ -41,9 +36,12 @@ public class PressInteractionEffect extends TriggerEffect {
             .build();
 
     private String hint = DEFAULT_HINT;
-    private TriggerEventType interactionEvent = TriggerEventType.ENTER;
     private boolean includeGroupEffects = true;
     private float hitboxPadding = 0.0f;
+
+    public PressInteractionEffect() {
+        setEventType(TriggerEventType.valueOf(DEFAULT_EVENT));
+    }
 
     @Override
     public void execute(@Nonnull TriggerContext context) {
@@ -53,11 +51,6 @@ public class PressInteractionEffect extends TriggerEffect {
     @Nonnull
     public String getHint() {
         return hint == null || hint.isBlank() ? DEFAULT_HINT : hint;
-    }
-
-    @Nonnull
-    public TriggerEventType getInteractionEvent() {
-        return interactionEvent == null ? TriggerEventType.ENTER : interactionEvent;
     }
 
     public boolean shouldIncludeGroupEffects() {

@@ -128,7 +128,7 @@ public class VolumeInteractionSystem extends TickingSystem<EntityStore> {
         VolumeInteractionComponent component = store.getComponent(ref, VolumeInteractionComponent.getComponentType());
         return component == null
                 || !volume.getId().equals(component.getVolumeId())
-                || effect.getInteractionEvent() != component.getEventType()
+                || effect.getEventType() != component.getEventType()
                 || effect.shouldIncludeGroupEffects() != component.shouldIncludeGroupEffects();
     }
 
@@ -206,7 +206,7 @@ public class VolumeInteractionSystem extends TickingSystem<EntityStore> {
     ) {
         return new VolumeInteractionComponent(
                 volume.getId(),
-                effect.getInteractionEvent(),
+                effect.getEventType(),
                 effect.shouldIncludeGroupEffects()
         );
     }
