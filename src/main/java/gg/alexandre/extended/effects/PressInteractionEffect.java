@@ -19,18 +19,18 @@ public class PressInteractionEffect extends TriggerEffect {
                     PressInteractionEffect.class, PressInteractionEffect::new, BASE_CODEC
             )
             .append(
-                    new KeyedCodec<>("Hint", Codec.STRING, false),
+                    new KeyedCodec<>("Hint", Codec.STRING),
                     (e, v) -> e.hint = v,
                     (e) -> e.hint
             ).add()
             .append(
-                    new KeyedCodec<>("IncludeGroupEffects", Codec.BOOLEAN, false),
+                    new KeyedCodec<>("IncludeGroupEffects", Codec.BOOLEAN),
                     (e, v) -> e.includeGroupEffects = v,
                     (e) -> e.includeGroupEffects
             ).add()
             .append(
-                    new KeyedCodec<>("HitboxPadding", Codec.FLOAT, false),
-                    (e, v) -> e.hitboxPadding = Math.max(0.0f, v),
+                    new KeyedCodec<>("HitboxPadding", Codec.FLOAT),
+                    (e, v) -> e.hitboxPadding = v == null ? 0 : Math.max(0.0f, v),
                     (e) -> e.hitboxPadding > 0.0f ? e.hitboxPadding : null
             ).add()
             .build();
@@ -38,10 +38,6 @@ public class PressInteractionEffect extends TriggerEffect {
     private String hint = DEFAULT_HINT;
     private boolean includeGroupEffects = true;
     private float hitboxPadding = 0.0f;
-
-    public PressInteractionEffect() {
-        setEventType(TriggerEventType.valueOf(DEFAULT_EVENT));
-    }
 
     @Override
     public void execute(@Nonnull TriggerContext context) {
@@ -61,4 +57,13 @@ public class PressInteractionEffect extends TriggerEffect {
         return Math.max(0.0f, hitboxPadding);
     }
 
+    @Override
+    public void setEventType(@Nonnull TriggerEventType eventType) {
+        // Force PRESS to be the default event type
+        if (this.getEventType() == null) {
+            eventType = TriggerEventType.valueOf(DEFAULT_EVENT);
+        }
+
+        super.setEventType(eventType);
+    }
 }
