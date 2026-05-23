@@ -16,3 +16,7 @@ customUI.triggerVolumeEffectEditor.field.ShapeColor.Opacity = Shape opacity
 customUI.triggerVolumeEffectEditor.field.ShapeColor.Opacity.tooltip = Shape opacity, from 0 to 1.
 customUI.triggerVolumeEffectEditor.field.ShapeColor.Clear = Clear
 customUI.triggerVolumeEffectEditor.field.ShapeColor.Clear.tooltip = If enabled, removes the visible shape.
+customUI.triggerVolumeEffectEditor.eventCategory.PRESS = [TMP] {state} On Press
+customUI.triggerVolumeEffectEditor.addEventType.PRESS = [TMP] On Press
+customUI.triggerVolumeEffectEditor.eventCategory.COMMAND = [TMP] {state} On Command
+customUI.triggerVolumeEffectEditor.addEventType.COMMAND = [TMP] On Command
