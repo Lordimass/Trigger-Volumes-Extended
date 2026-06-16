@@ -37,6 +37,9 @@ public class VolumeInteractionSystem extends TickingSystem<EntityStore> {
 
         TriggerVolumeManager manager = store.getResource(TriggerVolumesPlugin.get().getManagerResourceType());
         VolumeInteractionResource resource = store.getResource(VolumeInteractionResource.getResourceType());
+        if (manager == null || resource == null) {
+            return;
+        }
 
         Set<String> volumes = new HashSet<>();
         for (VolumeEntry volume : manager.getVolumes()) {
@@ -139,6 +142,7 @@ public class VolumeInteractionSystem extends TickingSystem<EntityStore> {
         }
 
         if (store.getComponent(ref, ModelComponent.getComponentType()) == null
+                || store.getComponent(ref, PersistentModel.getComponentType()) == null
                 || store.getComponent(ref, Interactable.getComponentType()) == null
                 || store.getComponent(ref, EntityStore.REGISTRY.getNonSerializedComponentType()) == null
                 || store.getComponent(ref, EntityModule.get().getVisibleComponentType()) == null) {
@@ -164,6 +168,8 @@ public class VolumeInteractionSystem extends TickingSystem<EntityStore> {
     private static void addComponents(@Nonnull Holder<EntityStore> holder, @Nonnull Store<EntityStore> store,
                                       @Nonnull VolumeEntry volume, @Nonnull PressInteractionEffect effect,
                                       @Nonnull InteractionGeometry geometry) {
+        Model model = createHitboxOnlyModel(geometry.localBox);
+
         holder.addComponent(UUIDComponent.getComponentType(), UUIDComponent.randomUUID());
         holder.addComponent(
                 NetworkId.getComponentType(),
@@ -171,7 +177,8 @@ public class VolumeInteractionSystem extends TickingSystem<EntityStore> {
         );
         holder.addComponent(TransformComponent.getComponentType(), new TransformComponent(geometry.center, Rotation3f.IDENTITY));
         holder.addComponent(BoundingBox.getComponentType(), new BoundingBox(geometry.localBox));
-        holder.addComponent(ModelComponent.getComponentType(), new ModelComponent(createHitboxOnlyModel(geometry.localBox)));
+        holder.addComponent(ModelComponent.getComponentType(), new ModelComponent(model));
+        holder.addComponent(PersistentModel.getComponentType(), new PersistentModel(model.toReference()));
         holder.addComponent(Interactable.getComponentType(), Interactable.INSTANCE);
         holder.addComponent(Invulnerable.getComponentType(), Invulnerable.INSTANCE);
         holder.addComponent(Interactions.getComponentType(), createInteractions(effect));
@@ -184,13 +191,14 @@ public class VolumeInteractionSystem extends TickingSystem<EntityStore> {
     private static void putComponents(@Nonnull Store<EntityStore> store, @Nonnull Ref<EntityStore> ref,
                                       @Nonnull VolumeEntry volume, @Nonnull PressInteractionEffect effect,
                                       @Nonnull InteractionGeometry geometry) {
+        Model model = createHitboxOnlyModel(geometry.localBox);
+
         store.putComponent(
                 ref, TransformComponent.getComponentType(), new TransformComponent(geometry.center, Rotation3f.IDENTITY)
         );
         store.putComponent(ref, BoundingBox.getComponentType(), new BoundingBox(geometry.localBox));
-        store.putComponent(
-                ref, ModelComponent.getComponentType(), new ModelComponent(createHitboxOnlyModel(geometry.localBox))
-        );
+        store.putComponent(ref, ModelComponent.getComponentType(), new ModelComponent(model));
+        store.putComponent(ref, PersistentModel.getComponentType(), new PersistentModel(model.toReference()));
         store.putComponent(ref, Interactable.getComponentType(), Interactable.INSTANCE);
         store.tryRemoveComponent(ref, Intangible.getComponentType());
         store.putComponent(ref, Invulnerable.getComponentType(), Invulnerable.INSTANCE);

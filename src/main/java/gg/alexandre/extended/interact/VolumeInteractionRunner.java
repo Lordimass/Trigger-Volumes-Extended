@@ -1,6 +1,7 @@
 package gg.alexandre.extended.interact;
 
 import com.hypixel.hytale.builtin.triggervolumes.EntityTargetType;
+import com.hypixel.hytale.builtin.triggervolumes.effect.TriggerCondition;
 import com.hypixel.hytale.builtin.triggervolumes.effect.TriggerContext;
 import com.hypixel.hytale.builtin.triggervolumes.effect.TriggerEffect;
 import com.hypixel.hytale.builtin.triggervolumes.effect.TriggerEventType;
@@ -35,14 +36,21 @@ public final class VolumeInteractionRunner {
         }
     }
 
-    public static void fire(@Nonnull TriggerEventType eventType, @Nonnull Ref<EntityStore> entityRef,
-                            @Nonnull UUID entityUuid, @Nonnull VolumeEntry volume,
-                            @Nonnull TriggerVolumeManager manager, @Nonnull Store<EntityStore> store,
-                            long nowNanos, boolean includeGroupEffects) {
+    public static boolean fire(@Nonnull TriggerEventType eventType, @Nonnull Ref<EntityStore> entityRef,
+                               @Nonnull UUID entityUuid, @Nonnull VolumeEntry volume,
+                               @Nonnull TriggerVolumeManager manager, @Nonnull Store<EntityStore> store,
+                               long nowNanos, boolean includeGroupEffects) {
+        if (!conditionsPass(volume.getConditions(), eventType, entityRef, volume, store, null,
+                "volume '" + volume.getId() + "'")) {
+            return false;
+        }
+
         fireEffects(eventType, entityRef, entityUuid, volume, store, nowNanos);
         if (includeGroupEffects) {
             fireGroupEffects(eventType, entityRef, entityUuid, volume, manager, store, nowNanos);
         }
+
+        return true;
     }
 
     private static void fireEffects(@Nonnull TriggerEventType eventType, @Nonnull Ref<EntityStore> entityRef,
@@ -139,6 +147,11 @@ public final class VolumeInteractionRunner {
             return;
         }
 
+        if (!conditionsPass(group.getConditions(), eventType, entityRef, volume, store, spatialVolumes,
+                "group '" + group.getId() + "' via volume '" + volume.getId() + "'")) {
+            return;
+        }
+
         List<TriggerEffect> effects = group.getEffects();
         for (int i = 0; i < effects.size(); i++) {
             TriggerEffect effect = effects.get(i);
@@ -192,6 +205,64 @@ public final class VolumeInteractionRunner {
 
     private static boolean shouldFireMemberVolume(@Nonnull VolumeEntry source, @Nonnull VolumeEntry member) {
         return !source.getId().equals(member.getId()) && member.isEnabled() && !member.isPendingDestroy();
+    }
+
+    private static boolean conditionsPass(@Nonnull List<TriggerCondition> conditions,
+                                          @Nonnull TriggerEventType eventType,
+                                          @Nonnull Ref<EntityStore> entityRef,
+                                          @Nonnull VolumeEntry volume,
+                                          @Nonnull Store<EntityStore> store,
+                                          @Nullable List<VolumeEntry> spatialVolumes,
+                                          @Nonnull String sourceLabel) {
+        if (conditions.isEmpty()) {
+            return true;
+        }
+
+        TriggerContext context;
+        try {
+            context = spatialVolumes == null
+                    ? new TriggerContext(entityRef, store, eventType, volume)
+                    : new TriggerContext(entityRef, store, eventType, volume, spatialVolumes);
+        } catch (Exception e) {
+            LOGGER.at(Level.WARNING).withCause(e).log("Error creating trigger context for %s", sourceLabel);
+            return false;
+        }
+
+        List<TriggerCondition> acceptedConditions = new ArrayList<>();
+        for (TriggerCondition condition : conditions) {
+            if (condition == null || condition.getEventType() != eventType) {
+                continue;
+            }
+
+            try {
+                if (!condition.test(context)) {
+                    return false;
+                }
+                acceptedConditions.add(condition);
+            } catch (Exception e) {
+                LOGGER.at(Level.WARNING).withCause(e).log(
+                        "Error evaluating condition %s on %s",
+                        condition.getClass().getSimpleName(),
+                        sourceLabel
+                );
+                return false;
+            }
+        }
+
+        for (TriggerCondition condition : acceptedConditions) {
+            try {
+                condition.applyOnAccept(context);
+            } catch (Exception e) {
+                LOGGER.at(Level.WARNING).withCause(e).log(
+                        "Error applying accepted condition %s on %s",
+                        condition.getClass().getSimpleName(),
+                        sourceLabel
+                );
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }

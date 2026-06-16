@@ -57,6 +57,10 @@ public class VolumeInteraction extends SimpleInstantInteraction {
         }
 
         TriggerVolumeManager manager = commandBuffer.getResource(TriggerVolumesPlugin.get().getManagerResourceType());
+        if (manager == null) {
+            fail(context);
+            return;
+        }
 
         VolumeEntry volume = manager.getVolume(component.getVolumeId());
         if (volume == null || !volume.isEnabled() || volume.isPendingDestroy()) {
@@ -76,8 +80,7 @@ public class VolumeInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        volume.recordActivation(uuid.getUuid(), nowNanos);
-        VolumeInteractionRunner.fire(
+        boolean fired = VolumeInteractionRunner.fire(
                 component.getEventType(),
                 playerRef,
                 uuid.getUuid(),
@@ -87,6 +90,12 @@ public class VolumeInteraction extends SimpleInstantInteraction {
                 nowNanos,
                 component.shouldIncludeGroupEffects()
         );
+        if (!fired) {
+            fail(context);
+            return;
+        }
+
+        volume.recordActivation(uuid.getUuid(), nowNanos);
     }
 
     private static void fail(@Nonnull InteractionContext context) {

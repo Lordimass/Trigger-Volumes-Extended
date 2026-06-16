@@ -1,5 +1,6 @@
 package gg.alexandre.extended.util;
 
+import com.hypixel.hytale.builtin.triggervolumes.effect.TriggerCondition;
 import com.hypixel.hytale.builtin.triggervolumes.effect.TriggerEffect;
 import com.hypixel.hytale.builtin.triggervolumes.effect.TriggerEventType;
 import com.hypixel.hytale.codec.Codec;
@@ -77,6 +78,7 @@ public class EnumReflectionUtil {
     public static void patchTriggerEffectCodec(@Nonnull Unsafe unsafe) throws ReflectiveOperationException {
         Set<Codec<?>> visited = Collections.newSetFromMap(new IdentityHashMap<>());
         patchTriggerEventCodecs(unsafe, TriggerEffect.BASE_CODEC, visited);
+        patchTriggerEventCodecs(unsafe, TriggerCondition.BASE_CODEC, visited);
     }
 
     private static void patchTriggerEventCodecs(@Nonnull Unsafe unsafe, @Nonnull Codec<?> codec,
