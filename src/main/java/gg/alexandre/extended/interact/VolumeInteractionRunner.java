@@ -19,8 +19,11 @@ import gg.alexandre.extended.effects.PressInteractionEffect;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
 import java.util.List;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 
 public final class VolumeInteractionRunner {
@@ -28,11 +31,18 @@ public final class VolumeInteractionRunner {
     @Nonnull
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     @Nonnull
-    private static final DelayedEffectScheduler DELAYED_EFFECT_SCHEDULER = new DelayedEffectScheduler();
+    private static final Map<Store<EntityStore>, DelayedEffectScheduler> DELAYED_EFFECT_SCHEDULERS =
+            Collections.synchronizedMap(new WeakHashMap<>());
+
+    @Nonnull
+    private static DelayedEffectScheduler getDelayedScheduler(@Nonnull Store<EntityStore> store) {
+        return DELAYED_EFFECT_SCHEDULERS.computeIfAbsent(store, ignored -> new DelayedEffectScheduler());
+    }
 
     public static void tickDelayed(@Nonnull Store<EntityStore> store) {
-        if (!DELAYED_EFFECT_SCHEDULER.isEmpty()) {
-            DELAYED_EFFECT_SCHEDULER.tick(System.nanoTime(), store);
+        DelayedEffectScheduler scheduler = DELAYED_EFFECT_SCHEDULERS.get(store);
+        if (scheduler != null && !scheduler.isEmpty()) {
+            scheduler.tick(System.nanoTime(), store);
         }
     }
 
@@ -81,12 +91,13 @@ public final class VolumeInteractionRunner {
 
             float totalDelay = volume.getActivationDelay() + effect.getDelay();
             if (totalDelay > 0.0f) {
+                DelayedEffectScheduler scheduler = getDelayedScheduler(store);
                 if (spatialVolumes == null) {
-                    DELAYED_EFFECT_SCHEDULER.schedule(
+                    scheduler.schedule(
                             effect, entityRef, entityUuid, eventType, volume, nowNanos, totalDelay
                     );
                 } else {
-                    DELAYED_EFFECT_SCHEDULER.schedule(
+                    scheduler.schedule(
                             effect, entityRef, entityUuid, eventType, volume, nowNanos, totalDelay, spatialVolumes
                     );
                 }
@@ -170,7 +181,7 @@ public final class VolumeInteractionRunner {
 
             float totalDelay = volume.getActivationDelay() + effect.getDelay();
             if (totalDelay > 0.0f) {
-                DELAYED_EFFECT_SCHEDULER.schedule(
+                getDelayedScheduler(store).schedule(
                         effect, entityRef, entityUuid, eventType, volume, nowNanos, totalDelay, spatialVolumes
                 );
                 if (intervalKey != null) {
