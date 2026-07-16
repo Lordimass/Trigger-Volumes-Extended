@@ -1,6 +1,7 @@
 customUI.triggerVolumeEffectEditor.field.Command.ExecuteAsPlayer = Execute as player
 customUI.triggerVolumeEffectEditor.field.Command.ExecuteAsPlayer.tooltip = If enabled, the command will be executed as the player who triggered the volume (will require the correct permissions). If disabled, it will be executed as the console.
 customUI.triggerVolumeEffectEditor.field.Command.Command = Command
+customUI.triggerVolumeEffectEditor.field.WorldTeleport.World = World
 customUI.triggerVolumeEffectEditor.field.Command.Command.tooltip = Command to execute, use @p to insert the player's name.
 customUI.triggerVolumeEffectEditor.field.DestroyOtherVolume.VolumeID = Volume ID
 customUI.triggerVolumeEffectEditor.field.DestroyOtherVolume.VolumeID.tooltip = ID of the volume to destroy

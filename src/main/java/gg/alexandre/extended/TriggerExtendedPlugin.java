@@ -8,10 +8,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import gg.alexandre.extended.commands.RunTriggerVolumeCommand;
 import gg.alexandre.extended.display.ShapeColorDisplayResource;
 import gg.alexandre.extended.display.ShapeColorDisplaySystem;
-import gg.alexandre.extended.effects.CommandEffect;
-import gg.alexandre.extended.effects.DestroyOtherVolumeEffect;
-import gg.alexandre.extended.effects.PressInteractionEffect;
-import gg.alexandre.extended.effects.ShapeColorEffect;
+import gg.alexandre.extended.effects.*;
 import gg.alexandre.extended.interact.*;
 import gg.alexandre.extended.util.EnumReflectionUtil;
 import sun.misc.Unsafe;
@@ -53,6 +50,7 @@ public class TriggerExtendedPlugin extends JavaPlugin {
 
     private void setupEffects() {
         TriggerVolumesPlugin.get().registerEffectType("Command", CommandEffect.class, CommandEffect.CODEC);
+        TriggerVolumesPlugin.get().registerEffectType("WorldTeleport", WorldTPEffect.class, WorldTPEffect.CODEC);
         TriggerVolumesPlugin.get().registerEffectType(
                 "DestroyOtherVolume", DestroyOtherVolumeEffect.class, DestroyOtherVolumeEffect.CODEC
         );
