@@ -1,13 +1,18 @@
 {
     "Group": "Alexandre",
     "Name": "Trigger Volumes Extended",
-    "Version": "1.2.2",
+    "Version": "1.2.3-pre1",
     "Description": "Extends Trigger Volumes with new features.",
     "Authors": [
         {
             "Name": "Alexandre",
             "Email": "contact@alexandre.gg",
             "Url": "https://github.com/Alexandre-slw"
+        },
+        {
+          "Name": "Lordimass",
+          "Email": "lordimass@lordimass.net",
+          "Url": "https://lordimass.net"
         }
     ],
     "Website": "https://alexandre.gg",
